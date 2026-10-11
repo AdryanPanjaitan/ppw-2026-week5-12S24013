@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? 'SIPUS-Del' }} — Institut Teknologi Del</title>
-    @if (!app()->environment('testing'))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .navbar-del { background-color: #4C1D95; }
