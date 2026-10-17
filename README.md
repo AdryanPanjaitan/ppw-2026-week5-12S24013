@@ -111,3 +111,81 @@ git push -u origin main
 - ✅ Validasi & Keamanan (20%): controller, partial form, CSRF, escaping, fillable, spoofing.
 - ✅ Blade & UI (20%): layout component, CRUD views, Bootstrap, pagination, empty state.
 - ✅ Seeders/Logging/Git/Laporan (15%): factory/seeder, `AppServiceProvider`, [docs/sql-audit.log](docs/sql-audit.log), tests, README, `.gitignore`.
+
+## Minggu 6 — Sirkulasi dan autentikasi
+
+Tahap ini menambahkan transaksi peminjaman dan pengembalian buku berbasis ACID,
+riwayat sirkulasi, pencarian katalog, statistik Query Builder, serta autentikasi
+pustakawan dengan session database dan cookie. Katalog dan detail buku tetap dapat
+dibaca publik, sedangkan semua operasi mutasi memerlukan login.
+
+### Instalasi dan menjalankan
+
+```bash
+git clone <URL-REPOSITORI> sipus-del
+cd sipus-del
+composer install
+cp .env.example .env
+php artisan key:generate
+```
+
+Pastikan `.env` memakai `DB_CONNECTION=sqlite`, `SESSION_DRIVER=database`,
+`SESSION_HTTP_ONLY=true`, dan `SESSION_SAME_SITE=lax`. Setelah itu jalankan:
+
+```bash
+php artisan migrate:fresh --seed
+php artisan serve
+```
+
+Akun uji pustakawan: **pustakawan@del.ac.id** / **password123**.
+
+### ERD Minggu 6
+
+```mermaid
+erDiagram
+    KATEGORIS ||--o{ BUKUS : memiliki
+    BUKUS ||--o{ PEMINJAMANS : dipinjam
+    USERS { bigint id PK string name string email }
+    KATEGORIS { bigint id PK string kode_kategori string nama_kategori }
+    BUKUS { bigint id PK string isbn string judul bigint kategori_id FK unsigned_integer stok }
+    PEMINJAMANS { bigint id PK string kode_pinjam bigint buku_id FK string nim_peminjam string status date tanggal_pinjam date tanggal_kembali }
+```
+
+### Mekanisme ACID dan concurrency
+
+Proses pinjam dan kembali dijalankan di dalam `DB::transaction`. Baris buku dikunci
+dengan `lockForUpdate()` sebelum stok dibaca atau diubah. Tanpa kunci, dua request
+bersamaan dapat sama-sama membaca stok satu dan menghasilkan stok negatif atau
+jumlah transaksi yang tidak sesuai (race condition). Jika stok habis, peminjam
+ganda, atau terjadi exception database, transaksi di-rollback sehingga perubahan
+stok dan record peminjaman tidak tersimpan sebagian.
+
+### Session dan cookie
+
+Setelah kredensial benar, `session()->regenerate()` mengganti ID session untuk
+mencegah session fixation. Saat logout, `invalidate()` menghapus state session dan
+`regenerateToken()` membuat CSRF token baru. Cookie email terakhir dibuat dengan
+`Cookie::queue()` untuk membantu pengisian form; cookie session memakai atribut
+`HttpOnly` dan `SameSite=Lax` agar tidak mudah diakses JavaScript dan mengurangi
+risiko pengiriman lintas situs.
+
+### Bukti pengujian
+
+Folder [docs/screenshots/](docs/screenshots/) sudah disiapkan. Gambar berikut masih
+perlu diambil manual dan ditempatkan sesuai nama file (TODO):
+
+- `01-peminjaman-berhasil.png`: login, buka detail buku yang stoknya tersedia, klik
+  **Pinjam buku**, isi NIM/nama, lalu simpan dan tampilkan pesan berhasil.
+- `02-pengembalian-berhasil.png`: buka menu **Peminjaman**, klik **Kembalikan** pada
+  baris berstatus dipinjam, dan tampilkan pesan berhasil.
+- `03-penolakan-stok-0.png`: buka detail buku stok habis, coba pinjam, lalu ambil
+  tampilan pesan penolakan stok.
+- `04-devtools-cookie-httponly.png`: login, buka DevTools browser > **Application**
+  > **Cookies** > alamat aplikasi, lalu tampilkan cookie session dan atribut
+  `HttpOnly` serta `SameSite=Lax`.
+- `05-statistik-dan-katalog.png` (opsional): buka katalog dan tampilkan kartu
+  statistik serta hasil pencarian/filter kategori.
+
+Jalankan `php artisan test` untuk menguji CRUD, validasi, transaksi stok,
+pengembalian, pembatasan auth, dan login. Ringkasan hasil terbaru dicatat setelah
+verifikasi lokal.
