@@ -22,6 +22,15 @@
             <div class="navbar-nav flex-row gap-3">
                 <a class="nav-link {{ request()->routeIs('buku.*') ? 'active fw-semibold' : '' }}" href="{{ route('buku.index') }}">Buku</a>
                 <a class="nav-link {{ request()->routeIs('kategori.*') ? 'active fw-semibold' : '' }}" href="{{ route('kategori.index') }}">Kategori</a>
+                @auth
+                    <a class="nav-link {{ request()->routeIs('peminjaman.*') ? 'active fw-semibold' : '' }}" href="{{ route('peminjaman.index') }}">Peminjaman</a>
+                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                        @csrf
+                        <button class="nav-link border-0 bg-transparent" type="submit">Keluar</button>
+                    </form>
+                @else
+                    <a class="nav-link" href="{{ route('login') }}">Masuk</a>
+                @endauth
             </div>
         </div>
     </nav>
