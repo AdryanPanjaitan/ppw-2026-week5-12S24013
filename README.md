@@ -183,8 +183,6 @@ perlu diambil manual dan ditempatkan sesuai nama file (TODO):
 - `04-devtools-cookie-httponly.png`: login, buka DevTools browser > **Application**
   > **Cookies** > alamat aplikasi, lalu tampilkan cookie session dan atribut
   `HttpOnly` serta `SameSite=Lax`.
-- `05-statistik-dan-katalog.png` (opsional): buka katalog dan tampilkan kartu
-  statistik serta hasil pencarian/filter kategori.
 
 Jalankan `php artisan test` untuk menguji CRUD, validasi, transaksi stok,
 pengembalian, pembatasan auth, dan login. Ringkasan hasil terbaru dicatat setelah
