@@ -171,8 +171,7 @@ risiko pengiriman lintas situs.
 
 ### Bukti pengujian
 
-Folder [docs/screenshots/](docs/screenshots/) sudah disiapkan. Gambar berikut masih
-perlu diambil manual dan ditempatkan sesuai nama file (TODO):
+Folder [docs/screenshots/](docs/screenshots/) berisi bukti pengujian berikut:
 
 - `01-peminjaman-berhasil.png`: login, buka detail buku yang stoknya tersedia, klik
   **Pinjam buku**, isi NIM/nama, lalu simpan dan tampilkan pesan berhasil.
@@ -185,5 +184,5 @@ perlu diambil manual dan ditempatkan sesuai nama file (TODO):
   `HttpOnly` serta `SameSite=Lax`.
 
 Jalankan `php artisan test` untuk menguji CRUD, validasi, transaksi stok,
-pengembalian, pembatasan auth, dan login. Ringkasan hasil terbaru dicatat setelah
-verifikasi lokal.
+pengembalian, pembatasan auth, dan login. Verifikasi lokal terakhir: **10 test
+lulus, 54 assertion lulus**.
