@@ -23,6 +23,11 @@ class Peminjaman extends Model
         'tanggal_kembali' => 'date',
     ];
 
+    public function scopeAktif($query)
+    {
+        return $query->where('status', 'dipinjam');
+    }
+
     public function buku(): BelongsTo
     {
         return $this->belongsTo(Buku::class);

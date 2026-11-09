@@ -183,6 +183,57 @@ Folder [docs/screenshots/](docs/screenshots/) berisi bukti pengujian berikut:
   > **Cookies** > alamat aplikasi, lalu tampilkan cookie session dan atribut
   `HttpOnly` serta `SameSite=Lax`.
 
+## Minggu 9 — REST API, SOAP, dan integrasi layanan
+
+Implementasi Minggu 9 mempertahankan aplikasi web/session Minggu 5–6 dan
+menambahkan API JSON pada prefix `/api/v1`. Kontrak lengkap tersedia pada
+[docs/openapi.yaml](docs/openapi.yaml), sedangkan request siap uji tersedia pada
+[Postman Collection](docs/postman/SIPUS-Del-Minggu-9.postman_collection.json).
+
+### Endpoint dan autentikasi
+
+- `POST /api/v1/auth/login`, `GET /api/v1/auth/me`, dan
+  `POST /api/v1/auth/logout` memakai token Laravel Sanctum.
+- `GET /api/v1/bukus`, `GET /api/v1/bukus/{id}`, `POST`, `PUT`, `PATCH`, dan
+  `DELETE /api/v1/bukus` menyediakan katalog dengan pagination, pencarian,
+  filter, sorting, eager loading, `withCount`, dan tautan HATEOAS.
+- `GET/POST /api/v1/peminjamans` dan
+  `PATCH /api/v1/peminjamans/{id}/kembali` memakai Bearer token.
+- `GET /api/v1/bukus/{id}/referensi-eksternal` mengonsumsi OpenLibrary dengan
+  timeout 8 detik.
+- `GET /soap/sipus.wsdl` menyediakan kontrak WSDL dan `POST /soap/sipus`
+  menyediakan pemeriksaan clearance berbasis data peminjaman aktif.
+
+Response error API menggunakan RFC 7807 (`application/problem+json`) untuk
+401, 404, 409, 422, dan kegagalan layanan eksternal. API Resource menampilkan
+link `self`, link pinjam hanya saat stok tersedia, dan link kembali hanya saat
+peminjaman berstatus `dipinjam`.
+
+### ACID dan keterbatasan SQLite
+
+Peminjaman dan pengembalian menggunakan `DB::transaction()` serta
+`lockForUpdate()` sesuai kontrak praktikum. SQLite tetap menjalankan transaksi
+dan menjaga atomicity, consistency, isolation, serta durability sesuai
+kemampuan drivernya, tetapi **tidak menyediakan row-level locking seperti
+MySQL/PostgreSQL**. Karena itu `lockForUpdate()` pada SQLite tidak boleh
+dianggap sebagai bukti jaminan bebas race condition; kebutuhan locking baris
+nyata perlu dikonfirmasi kepada dosen sebelum mengganti database.
+
+### Menjalankan dan menguji API
+
+```bash
+php artisan migrate:fresh --seed
+php artisan serve
+```
+
+Gunakan akun `pustakawan@del.ac.id` / `password123` hanya untuk pengujian
+lokal, lalu kirim token sebagai `Authorization: Bearer <token>`. Jalankan
+`php artisan test` untuk seluruh test dan gunakan koleksi Postman tanpa
+menyimpan token asli di repository. Bukti praktikum yang disarankan meliputi
+WSDL/SOAP success dan fault, login, katalog/HATEOAS, CRUD buku, konflik stok
+dan duplikat, pengembalian, RFC 7807, OpenLibrary, OpenAPI, Postman, serta
+branch/commit Git. Token pada screenshot harus disamarkan.
+
 Jalankan `php artisan test` untuk menguji CRUD, validasi, transaksi stok,
 pengembalian, pembatasan auth, dan login. Verifikasi lokal terakhir: **10 test
 lulus, 54 assertion lulus**.
