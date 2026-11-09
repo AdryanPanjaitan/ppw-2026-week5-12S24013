@@ -10,16 +10,17 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
-.navbar-del {
-    background-color: #4C1D95;
+.Tersedia {
+    background-color: #00ff59;
+    font-color: #090909;
 }
 
-.btn-del {
-    background-color: #4C1D95;
-    color: #ffffff;
+.Dipinjam {
+    background-color: #f7eb06f0;
+    font-color: #ffffff;
 }
 
 .btn-del:hover {
-    background-color: #3B0764;
+    background-color: #d80000f6;
     color: #ffffff;
 }
