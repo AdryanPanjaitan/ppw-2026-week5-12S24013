@@ -1,0 +1,163 @@
+openapi: 3.0.3
+info:
+  title: SIPUS-Del API
+  version: 1.0.0
+  description: REST API dan endpoint SOAP SIPUS-Del Minggu 9.
+servers:
+  - url: http://localhost:8000
+paths:
+  /api/v1/auth/login:
+    post:
+      summary: Membuat token Sanctum
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        '200': { description: Login berhasil }
+        '401': { $ref: '#/components/responses/Problem' }
+  /api/v1/auth/me:
+    get:
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Pengguna aktif }
+  /api/v1/auth/logout:
+    post:
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Token dicabut }
+  /api/v1/bukus:
+    get:
+      summary: Daftar buku dengan pencarian, filter, sorting, dan pagination
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+        - { name: kategori_id, in: query, schema: { type: integer } }
+        - { name: tersedia, in: query, schema: { type: boolean } }
+        - { name: per_page, in: query, schema: { type: integer, minimum: 1, maximum: 100 } }
+        - { name: sort, in: query, schema: { type: string, enum: [judul, penulis, tahun_terbit, stok, created_at] } }
+        - { name: direction, in: query, schema: { type: string, enum: [asc, desc] } }
+      responses:
+        '200': { description: Daftar buku }
+    post:
+      security: [{ bearerAuth: [] }]
+      requestBody: { $ref: '#/components/requestBodies/Book' }
+      responses:
+        '201': { description: Buku dibuat }
+        '422': { $ref: '#/components/responses/Problem' }
+  /api/v1/bukus/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: integer } }
+    get:
+      responses:
+        '200': { description: Detail buku }
+        '404': { $ref: '#/components/responses/Problem' }
+    put:
+      security: [{ bearerAuth: [] }]
+      requestBody: { $ref: '#/components/requestBodies/Book' }
+      responses: { '200': { description: Buku diperbarui } }
+    patch:
+      security: [{ bearerAuth: [] }]
+      requestBody: { $ref: '#/components/requestBodies/Book' }
+      responses: { '200': { description: Buku diperbarui sebagian } }
+    delete:
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: Buku dihapus }
+        '409': { $ref: '#/components/responses/Problem' }
+  /api/v1/bukus/{id}/referensi-eksternal:
+    get:
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Data OpenLibrary }
+        '404': { $ref: '#/components/responses/Problem' }
+        '502': { $ref: '#/components/responses/Problem' }
+  /api/v1/peminjamans:
+    get:
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: nim_peminjam, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string, enum: [dipinjam, dikembalikan] } }
+        - { name: per_page, in: query, schema: { type: integer } }
+      responses: { '200': { description: Daftar peminjaman } }
+    post:
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [buku_id, nim_peminjam, nama_peminjam]
+              properties:
+                buku_id: { type: integer }
+                nim_peminjam: { type: string }
+                nama_peminjam: { type: string }
+      responses:
+        '201': { description: Peminjaman dibuat }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+  /api/v1/peminjamans/{id}/kembali:
+    patch:
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Buku dikembalikan }
+        '409': { $ref: '#/components/responses/Problem' }
+  /soap/sipus.wsdl:
+    get:
+      responses: { '200': { description: WSDL XML } }
+  /soap/sipus:
+    post:
+      summary: CheckClearance SOAP
+      requestBody:
+        required: true
+        content:
+          text/xml: { schema: { type: string } }
+      responses:
+        '200': { description: ClearanceResponse XML }
+        '500': { description: SOAP Fault XML }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum
+  requestBodies:
+    Book:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [isbn, judul, penulis, penerbit, tahun_terbit, kategori_id, stok]
+            properties:
+              isbn: { type: string }
+              judul: { type: string }
+              penulis: { type: string }
+              penerbit: { type: string }
+              tahun_terbit: { type: integer }
+              kategori_id: { type: integer }
+              stok: { type: integer, minimum: 0 }
+              sinopsis: { type: string }
+  responses:
+    Problem:
+      description: RFC 7807 Problem Details
+      content:
+        application/problem+json:
+          schema:
+            type: object
+            required: [type, title, status, detail, instance]
+            properties:
+              type: { type: string }
+              title: { type: string }
+              status: { type: integer }
+              detail: { type: string }
+              instance: { type: string }

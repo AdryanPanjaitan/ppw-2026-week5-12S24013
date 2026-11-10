@@ -1,0 +1,32 @@
+$kind: http-request
+url: http://127.0.0.1:8000/soap/sipus
+method: POST
+headers:
+  Content-Type: text/xml; charset=utf-8
+body:
+  type: xml
+  content: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r
+
+    <soap:Envelope\r
+
+    \    xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"\r
+
+    \    xmlns:tns=\"http://sipus-del.test/soap\">\r
+
+    \    <soap:Header/>\r
+
+    \    <soap:Body>\r
+
+    \        <tns:CheckClearance>\r
+
+    \            <nim_peminjam>12S24013</nim_peminjam>\r
+
+    \        </tns:CheckClearance>\r
+
+    \    </soap:Body>\r
+
+    </soap:Envelope>"
+settings:
+  disabledSystemHeaders:
+    - content-type
+order: 2000

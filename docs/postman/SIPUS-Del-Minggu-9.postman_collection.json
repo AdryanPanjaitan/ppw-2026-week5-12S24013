@@ -1,0 +1,56 @@
+{
+  "info": {
+    "name": "SIPUS-Del Minggu 9",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "token", "value": "" },
+    { "key": "buku_id", "value": "1" },
+    { "key": "peminjaman_id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"email\":\"pustakawan@del.ac.id\",\"password\":\"password123\"}" },
+        "url": "{{base_url}}/api/v1/auth/login"
+      }
+    },
+    { "name": "Katalog", "request": { "method": "GET", "url": "{{base_url}}/api/v1/bukus?per_page=10&tersedia=true" } },
+    { "name": "Detail Buku", "request": { "method": "GET", "url": "{{base_url}}/api/v1/bukus/{{buku_id}}" } },
+    {
+      "name": "Buat Buku",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"isbn\":\"9786021234598\",\"judul\":\"Buku API SIPUS\",\"penulis\":\"Pengarang\",\"penerbit\":\"Penerbit\",\"tahun_terbit\":2024,\"kategori_id\":1,\"stok\":2}" },
+        "url": "{{base_url}}/api/v1/bukus"
+      }
+    },
+    {
+      "name": "Peminjaman",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"buku_id\":{{buku_id}},\"nim_peminjam\":\"12S24013\",\"nama_peminjam\":\"Penguji API\"}" },
+        "url": "{{base_url}}/api/v1/peminjamans"
+      }
+    },
+    { "name": "Daftar Peminjaman", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{base_url}}/api/v1/peminjamans?status=dipinjam" } },
+    { "name": "Pengembalian", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{base_url}}/api/v1/peminjamans/{{peminjaman_id}}/kembali" } },
+    { "name": "Referensi OpenLibrary", "request": { "method": "GET", "url": "{{base_url}}/api/v1/bukus/{{buku_id}}/referensi-eksternal" } },
+    {
+      "name": "SOAP Clearance",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "text/xml" }],
+        "body": { "mode": "raw", "raw": "<?xml version=\"1.0\"?><SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\"><SOAP-ENV:Body><CheckClearance><nim_peminjam>12S24013</nim_peminjam></CheckClearance></SOAP-ENV:Body></SOAP-ENV:Envelope>" },
+        "url": "{{base_url}}/soap/sipus"
+      }
+    },
+    { "name": "SOAP Fault", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "text/xml" }], "body": { "mode": "raw", "raw": "<broken>" }, "url": "{{base_url}}/soap/sipus" } }
+  ]
+}

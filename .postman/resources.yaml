@@ -1,0 +1,9 @@
+# Use this workspace to collaborate
+workspace:
+  id: 9049b21c-0ef0-4133-8b3e-10137218fc58
+
+localResources:
+  collections:
+    - ../docs/postman/SIPUS-Del-Minggu-9.postman_collection.json
+  specs:
+    - ../docs/openapi.yaml
