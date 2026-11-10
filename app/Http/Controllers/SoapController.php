@@ -18,6 +18,7 @@ class SoapController extends Controller
     
 public function handle(Request $request): Response
 {
+    dd($request->getContent());
     try {
         libxml_use_internal_errors(true);
         libxml_clear_errors();
