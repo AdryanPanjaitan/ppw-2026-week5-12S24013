@@ -18,18 +18,19 @@ class SoapController extends Controller
     
 public function handle(Request $request): Response
 {
-    dd($request->getContent());
     try {
         libxml_use_internal_errors(true);
         libxml_clear_errors();
 
+         $xml = $request->getContent();
+
         $envelope = simplexml_load_string(
-            $request->getContent(),
+            $xml,
             SimpleXMLElement::class,
             LIBXML_NONET
         );
 
-        if (! $envelope) {
+        if ($envelope === false) {
             $errors = libxml_get_errors();
             $messages = [];
 
