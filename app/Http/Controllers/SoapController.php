@@ -18,11 +18,18 @@ class SoapController extends Controller
     public function handle(Request $request): Response
     {
         try {
-            libxml_use_internal_errors(true);
-            $envelope = simplexml_load_string($request->getContent(), SimpleXMLElement::class, LIBXML_NONET);
             if (! $envelope) {
-                throw new \InvalidArgumentException('XML SOAP tidak valid.');
-            }
+                 $errors = libxml_get_errors();
+                 $messages = [];
+
+                 foreach ($errors as $error) {
+                 $messages[] = trim($error->message);
+                }
+
+                  throw new \InvalidArgumentException(
+                   'XML SOAP tidak valid: ' . implode('; ', $messages)
+                );
+        }
             $nodes = $envelope->xpath('//*[local-name()="nim_peminjam"]');
             $nim = trim((string) ($nodes[0] ?? ''));
             if ($nim === '') {
