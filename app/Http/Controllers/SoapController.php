@@ -69,22 +69,31 @@ public function handle(Request $request): Response
             )
         );
 
-    } catch (Throwable $exception) {
-        return $this->xmlResponse(
-            $this->envelope(
-                'Fault',
-                '<faultcode>SOAP-ENV:Client</faultcode>'
-                . '<faultstring>'
-                . htmlspecialchars(
-                    $exception->getMessage(),
-                    ENT_XML1,
-                    'UTF-8'
-                )
-                . '</faultstring>'
-            ),
-            500
-        );
-    }
+    } 
+     catch (Throwable $exception) {
+    $statusCode = $exception instanceof \InvalidArgumentException
+        ? 400
+        : 500;
+    
+    $faultCode = $statusCode === 400
+    ? 'SOAP-ENV:Client'
+    : 'SOAP-ENV:Server';
+
+    return $this->xmlResponse(
+        $this->envelope(
+            'Fault',
+            '<faultcode>' . $faultCode . '</faultcode>'
+            . '<faultstring>'
+            . htmlspecialchars(
+                $exception->getMessage(),
+                ENT_XML1,
+                'UTF-8'
+            )
+            . '</faultstring>'
+        ),
+        $statusCode
+    );
+}
 }
 
 

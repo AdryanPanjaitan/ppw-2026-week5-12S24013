@@ -83,7 +83,7 @@ class ApiWeek9Test extends TestCase
             ->assertOk()->assertSee('<active_loans>1</active_loans>', false)
             ->assertSee('<is_cleared>false</is_cleared>', false);
         $this->call('POST', '/soap/sipus', [], [], [], ['CONTENT_TYPE' => 'text/xml'], '<broken>')
-            ->assertStatus(500)->assertSee('SOAP-ENV:Client', false);
+            ->assertStatus(400)->assertSee('SOAP-ENV:Client', false);
     }
 
     public function test_external_book_reference_handles_openlibrary_response(): void
